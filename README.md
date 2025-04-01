@@ -11,4 +11,4 @@ This project implements an algorithm for detecting ski turns from IMU sensor dat
 Install the required packages:
 
 ```bash
-pip install -r requirements_ijcai.txt
+pip install -r requirements.txt
