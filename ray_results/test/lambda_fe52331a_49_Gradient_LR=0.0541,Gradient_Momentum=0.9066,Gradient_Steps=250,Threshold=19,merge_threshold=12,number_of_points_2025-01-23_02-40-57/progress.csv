@@ -1,0 +1,2 @@
+score,time_this_iter_s,done,training_iteration,trial_id,date,timestamp,time_total_s,pid,hostname,node_ip,time_since_restore,iterations_since_restore
+0.8265663628570203,9.824345111846924,False,1,fe52331a,2025-01-23_02-41-08,1737596468,9.824345111846924,30566,MacBook-Pro.ds19.agh.edu.pl,127.0.0.1,9.824345111846924,1

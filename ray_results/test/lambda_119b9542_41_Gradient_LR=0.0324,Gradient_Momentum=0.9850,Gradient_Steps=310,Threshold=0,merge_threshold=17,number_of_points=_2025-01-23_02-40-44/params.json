@@ -1,0 +1,9 @@
+{
+  "Gradient_LR": 0.03242841175084241,
+  "Gradient_Momentum": 0.9849635797366073,
+  "Gradient_Steps": 310,
+  "Threshold": 0,
+  "merge_threshold": 17,
+  "number_of_points": 100,
+  "outliers_multiplier": 4.639712353328051
+}
