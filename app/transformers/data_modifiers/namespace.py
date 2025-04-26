@@ -7,11 +7,13 @@ SLOPE_COLUMN = "SLOPE"
 
 # Constants for skiing styles
 class SkiStyle(str, Enum):
-    CARVING = "carving"
-    RACING = "racing"
-    FREESTYLE = "freestyle"
-    ALL_MOUNTAIN = "all_mountain"
-    POWDER = "powder"
+    SNOWPLOW = "snowplow"
+    SKIDDED_SHORT = "skidded_short"
+    SKIDDED_LONG = "skidded_long"
+    UP_UNWEIGHTING = "up_unweighting"  # NW
+    CARVING_LONG = "carving_long"
+    CARVING_SHORT = "carving_short"
+    QUICK = "quick"  # smig
 
 
 # Constants for skier levels

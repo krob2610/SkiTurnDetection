@@ -1,8 +1,7 @@
 import pandas as pd
 from abc import ABC, abstractmethod
-from enum import Enum
 
-from app.transformers.namespace import (
+from app.transformers.data_modifiers.namespace import (
     SkiStyle,
     SkierLevel,
     Slope,
