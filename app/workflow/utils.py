@@ -28,13 +28,17 @@ def read_files(path: str, snowplow: bool = False):
     return dataframes
 
 
-def read_files_recursive(path: str, snowplow: bool = False):
+def read_files_recursive(
+    path: str, snowplow: bool = False, return_filenames: bool = False
+):
     """
     Recursively reads .csv files from folders and subfolders.
 
     Args:
         path (str): Main folder path.
         snowplow (bool): Whether to include files with "snow_plow" in the name. Default is False.
+        return_filenames (bool): Whether to also return filenames. Default is False.
+
 
     Returns:
         list: List of DataFrames loaded from .csv files.
@@ -43,7 +47,7 @@ def read_files_recursive(path: str, snowplow: bool = False):
     base_path = Path(path)
     csv_files = base_path.rglob("*.csv")  # find all csv files recursively
 
-    dataframes = []
+    dataframes, processed_filenames = [], []
     for file in csv_files:
         file_name = str(file.name)
         file_path = str(file)
@@ -54,8 +58,9 @@ def read_files_recursive(path: str, snowplow: bool = False):
             print(f"Processing: {file_path}")
             loader = DataLoader(file_path)
             dataframes.append(loader.load_transform_data())
+            processed_filenames.append(file_path)
 
-    return dataframes
+    return dataframes, processed_filenames if return_filenames else dataframes
 
 
 def split_data_granular(dataframe_list: list[pd.DataFrame], split_on: str):
