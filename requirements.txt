@@ -18,3 +18,5 @@ notebook==7.0.0
 nbformat==5.9.2
 matplotlib-inline==0.1.6
 tornado==6.4
+# Test dependencies
+pytest==8.3.5

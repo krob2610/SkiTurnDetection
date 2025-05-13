@@ -52,15 +52,19 @@ def read_files_recursive(
         file_name = str(file.name)
         file_path = str(file)
 
+        # * no use as files ends with "sp"
         if "snow_plow" in file_name and not snowplow:
-            print(f"snowflow run skipped: {file_path}")
+            print(f"snowplow run skipped: {file_path}")
         else:
             print(f"Processing: {file_path}")
             loader = DataLoader(file_path)
             dataframes.append(loader.load_transform_data())
             processed_filenames.append(file_path)
 
-    return dataframes, processed_filenames if return_filenames else dataframes
+    if return_filenames:
+        return dataframes, processed_filenames
+    else:
+        return dataframes
 
 
 def split_data_granular(dataframe_list: list[pd.DataFrame], split_on: str):
