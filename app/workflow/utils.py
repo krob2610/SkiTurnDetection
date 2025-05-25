@@ -27,7 +27,7 @@ def read_files(path: str, snowplow: bool = False):
                 dataframes.append(loader.load_transform_data())
     return dataframes
 
-
+# TODOI: Will we be using turns_with_styles as well? Including files with "snowplow" 
 def read_files_recursive(
     path: str, snowplow: bool = False, return_filenames: bool = False
 ):

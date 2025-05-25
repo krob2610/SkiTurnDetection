@@ -104,6 +104,7 @@ def unwrap_column(data_column, period=2 * np.pi):
     return pd.Series(unwrapped_data, index=data_column.index)
 
 # TODO: What is a trend? Why is it not defined?
+# TODOI: In what situations is it better to enforce a fixed trend? Would adding a tolerance to avoid overcorrecting small fluctuations be a good idea?
 def unwrap_column_v2(data_column, period=2 * np.pi):
     """
     Unwraps a column of cyclic data, enforcing a fixed trend (either "grow" or "descend")
