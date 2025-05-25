@@ -37,7 +37,8 @@ def calculate_camera_time_offset(PHONE_TIME: list, CAMERA_TIME: list) -> int:
     # = phone_delta_time + timedelta(milliseconds=PHONE_OFFSET)
     return (phone_delta_time - camerta_delta_time).total_seconds() * 1000
 
-
+# TODO: Is load_data_for_device actually used anywhere in the workflow?
+# If yes, why does it expect a file/folder (data/{date}/{device}/final_df.csv) that may not exist by default?
 def load_data_for_device(device_names: list, current_date: str) -> dict:
     """
     Load data for each device for a given date.
@@ -102,7 +103,7 @@ def unwrap_column(data_column, period=2 * np.pi):
 
     return pd.Series(unwrapped_data, index=data_column.index)
 
-
+# TODO: What is a trend? Why is it not defined?
 def unwrap_column_v2(data_column, period=2 * np.pi):
     """
     Unwraps a column of cyclic data, enforcing a fixed trend (either "grow" or "descend")

@@ -66,7 +66,8 @@ def read_files_recursive(
     else:
         return dataframes
 
-
+# TODO: How is granularity defined?
+# Are data split based on time, fixed index ranges, or other criteria?
 def split_data_granular(dataframe_list: list[pd.DataFrame], split_on: str):
     orientation_dfs = []
     for df in dataframe_list:
@@ -229,7 +230,7 @@ def find_midpoints_with_weights(mins_l, mins_counts, maxs_l, max_counts):
 
     return midpoints_mins, midpoints_mins_counts, midpoints_maxs, midpoints_maxs_counts
 
-
+# TODO: Is the percentile threshold still necessary if 'remove_outliers' has already been applied beforehand?
 def filter_extremes(final_positions, counts, threshold_int=75):
     # unique_positions, counts = np.unique(final_positions, return_counts=True)
     final_positions_array = np.array(final_positions)
@@ -242,7 +243,8 @@ def filter_extremes(final_positions, counts, threshold_int=75):
 
     return important_extrema_indices, important_extrema_counts
 
-
+# TODO: What is the difference between 'label_apex' and 'find_midpoints_with_weights'?
+# Is 'label_apex' a simplified version of midpoint detection? When should each approach be used?
 def label_apex(df: pd.DataFrame) -> pd.DataFrame:
     """Mark apex (most important point in the turn) based on behavior and status column."""
     df_cp = df.copy()
@@ -879,7 +881,8 @@ def process_turns_with_restricted_distances(df):
 
     return pd.DataFrame(rows)
 
-
+# TODO: What exactly does 'calculate_scores_sec_metric' compute?
+# How is a "correct prediction" defined in this context?
 def calculate_scores_sec_metric(df):
     df_cp = df.copy()
 
@@ -952,7 +955,8 @@ def get_next_el(current, searched_list, add_index=1):
     else:
         return get_next_el(current, searched_list, add_index=add_index + 1)
 
-
+# TODO: How are points to be removed selected?
+# How should the count threshold be chosen in practice?
 def align_min_max_lists_counts_order(
     new_filtered_mins, new_filtered_max, min_counts, max_counts
 ):
