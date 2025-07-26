@@ -5,77 +5,6 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-
-def calculate_camera_time_offset(PHONE_TIME: list, CAMERA_TIME: list) -> int:
-    """Calculate offset for camera time
-
-    Parameters
-    ----------
-    PHONE_TIME : list
-        list with phone time
-    PHONE_OFFSET : int
-        offset for phone time
-    CAMERA_TIME : int
-        camera time
-
-    Returns
-    -------
-    int
-        offset for camera time
-    """
-    phone_delta_time = timedelta(
-        hours=PHONE_TIME[0],
-        minutes=PHONE_TIME[1],
-        seconds=PHONE_TIME[2],
-        milliseconds=PHONE_TIME[3] * 100,
-    )
-    camerta_delta_time = timedelta(
-        hours=CAMERA_TIME[0],
-        minutes=CAMERA_TIME[1],
-        seconds=CAMERA_TIME[2],
-    )
-    # = phone_delta_time + timedelta(milliseconds=PHONE_OFFSET)
-    return (phone_delta_time - camerta_delta_time).total_seconds() * 1000
-
-
-def load_data_for_device(device_names: list, current_date: str) -> dict:
-    """
-    Load data for each device for a given date.
-
-    Parameters
-    ----------
-    device_names : list
-        List of device names for which data is to be loaded.
-    current_date : str
-        The date for which data is to be loaded, in the format 'YYYY-MM-DD'.
-
-    Returns
-    -------
-    dict
-        A dictionary where the keys are device names and the values are pandas DataFrames containing the data for each device.
-    """
-    df_dict = {}
-    for device_name in device_names:
-        res = None
-        print(f"device_name: {device_name}")
-        try:
-            res = pd.read_csv(f"data/{current_date}/{device_name}/final_df.csv")
-            for col in res.columns:
-                if col != "time":
-                    res[col] = res[col].apply(
-                        lambda x: literal_eval(x) if isinstance(x, str) else x
-                    )
-                else:
-                    res[col] = pd.to_datetime(res[col])
-        except FileNotFoundError:
-            print(f"data/{current_date}/{device_name}/")
-        except pd.errors.EmptyDataError:
-            print(f"data/{current_date}/{device_name}/")
-
-        df_dict[device_name] = res
-    return df_dict
-
-
 # * for making yaw not crossing pi/-pi
 def unwrap_column(data_column, period=2 * np.pi):
     """
@@ -101,48 +30,6 @@ def unwrap_column(data_column, period=2 * np.pi):
         unwrapped_data.append(data_column.iloc[i] + cumulative_shift)
 
     return pd.Series(unwrapped_data, index=data_column.index)
-
-
-def unwrap_column_v2(data_column, period=2 * np.pi):
-    """
-    Unwraps a column of cyclic data, enforcing a fixed trend (either "grow" or "descend")
-    until it crosses another margin.
-
-    :param data_column: A pandas Series of angle data (e.g., roll, pitch, yaw) in radians.
-    :param period: The period of cyclic data, default is 2*pi for radian data.
-    :param trend: Either "grow" or "descend" to enforce the desired trend direction.
-    :return: A pandas Series of unwrapped data.
-    """
-    unwrapped_data = [data_column.iloc[0]]  # Start with the first value
-    cumulative_shift = 0  # Track cumulative shift due to wrapping correction
-
-    for i in range(1, len(data_column)):
-        current_value = data_column.iloc[i]
-        previous_value = unwrapped_data[-1]  # Use the last unwrapped value
-        delta = current_value - previous_value
-
-        # Detect wrap-around and apply correction
-        if delta > period / 2:
-            cumulative_shift -= period  # Forward jump
-        elif delta < -period / 2:
-            cumulative_shift += period  # Backward jump
-
-        # Correct the value using the cumulative shift
-        corrected_value = current_value + cumulative_shift
-
-        # Enforce the trend
-        if trend == "grow" and corrected_value < previous_value:
-            # Force the value to grow by adding the period
-            corrected_value += period
-        elif trend == "descend" and corrected_value > previous_value:
-            # Force the value to descend by subtracting the period
-            corrected_value -= period
-
-        # Append the corrected value
-        unwrapped_data.append(corrected_value)
-
-    return pd.Series(unwrapped_data, index=data_column.index)
-
 
 # * for making yaw not crossing pi/-pi
 def unwrap_angles(

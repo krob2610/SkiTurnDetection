@@ -19,7 +19,7 @@ def read_files(path: str, snowplow: bool = False):
     dataframes = []
     for file in files:
         if file.endswith(".csv"):
-            if "snow_plow" in file and not snowplow:
+            if "sp" in file and not snowplow:
                 print(f"snowflow run skiped {path}/{str(file)}")
             else:
                 print(f"{path}/{str(file)}")
@@ -27,7 +27,9 @@ def read_files(path: str, snowplow: bool = False):
                 dataframes.append(loader.load_transform_data())
     return dataframes
 
-
+# TODOI: Will we be using turns_with_styles as well? Including files with "snowplow" 
+# turns_with_styles is a folder with turn data and additional information about driving style, difficulty level and slope color. 
+# We will use it because it allows for a more accurate analysis of the context of the turns.
 def read_files_recursive(
     path: str, snowplow: bool = False, return_filenames: bool = False
 ):
@@ -53,7 +55,7 @@ def read_files_recursive(
         file_path = str(file)
 
         # * no use as files ends with "sp"
-        if "snow_plow" in file_name and not snowplow:
+        if "sp" in file_name and not snowplow:
             print(f"snowplow run skipped: {file_path}")
         else:
             print(f"Processing: {file_path}")
@@ -66,7 +68,9 @@ def read_files_recursive(
     else:
         return dataframes
 
-
+# TODO: How is granularity defined?
+# Are data split based on time, fixed index ranges, or other criteria?
+# The data is separated by unpacking the sensor columns (e.g., “Orientation”) into separate columns, according to the data structure.
 def split_data_granular(dataframe_list: list[pd.DataFrame], split_on: str):
     orientation_dfs = []
     for df in dataframe_list:
@@ -229,7 +233,8 @@ def find_midpoints_with_weights(mins_l, mins_counts, maxs_l, max_counts):
 
     return midpoints_mins, midpoints_mins_counts, midpoints_maxs, midpoints_maxs_counts
 
-
+# TODO: Is the percentile threshold still necessary if 'remove_outliers' has already been applied beforehand?
+# It is not necessary, but can be useful as an additional selection step after removing outliers.
 def filter_extremes(final_positions, counts, threshold_int=75):
     # unique_positions, counts = np.unique(final_positions, return_counts=True)
     final_positions_array = np.array(final_positions)
@@ -242,7 +247,9 @@ def filter_extremes(final_positions, counts, threshold_int=75):
 
     return important_extrema_indices, important_extrema_counts
 
-
+# TODO: What is the difference between 'label_apex' and 'find_midpoints_with_weights'? Is 'label_apex' a simplified version of midpoint detection? When should each approach be used?
+# label_apex finds the midpoint between START-STOP events with the same Behavior, so it works on data with logical labels.
+# find_midpoints_with_weights determines the midpoints between minima and maxima based only on positions and weights, without additional columns.
 def label_apex(df: pd.DataFrame) -> pd.DataFrame:
     """Mark apex (most important point in the turn) based on behavior and status column."""
     df_cp = df.copy()
@@ -280,7 +287,6 @@ def label_apex_list(dfs: list[pd.DataFrame]):
         dfs_labeled.append(label_apex(df))
     return dfs_labeled
 
-
 def align_min_max_lists(
     new_filtered_mins,
     new_filtered_mins_counts,
@@ -314,17 +320,17 @@ def align_min_max_lists(
     )
 
 
-def append_predictions_df(
-    df: pd.DataFrame, positions_L: np.ndarray, positions_R: np.ndarray
-):
-    df_copy = df.copy()
+# def append_predictions_df(
+#     df: pd.DataFrame, positions_L: np.ndarray, positions_R: np.ndarray
+# ):
+#     df_copy = df.copy()
 
-    df_copy["Predicted_Turn"] = False
-    # assign left turns by index
-    df_copy.iloc[positions_L, df_copy.columns.get_loc("Predicted_Turn")] = "L"
-    # assign right turns by index
-    df_copy.iloc[positions_R, df_copy.columns.get_loc("Predicted_Turn")] = "R"
-    return df_copy
+#     df_copy["Predicted_Turn"] = False
+#     # assign left turns by index
+#     df_copy.iloc[positions_L, df_copy.columns.get_loc("Predicted_Turn")] = "L"
+#     # assign right turns by index
+#     df_copy.iloc[positions_R, df_copy.columns.get_loc("Predicted_Turn")] = "R"
+#     return df_copy
 
 
 def append_predictions_df_new(
@@ -406,24 +412,24 @@ def extract_turns_and_predictions(df: pd.DataFrame):
     return df_merged
 
 
-def calculate_scores(df_forecast: pd.DataFrame, margin_of_error: float = 10):
-    """
-    Calculate the True Positives, False Positives, False Negatives, and True Negatives from the forecast DataFrame.
-    Also calculate the precision, recall, F1 score, and accuracy.
+# def calculate_scores(df_forecast: pd.DataFrame, margin_of_error: float = 10):
+#     """
+#     Calculate the True Positives, False Positives, False Negatives, and True Negatives from the forecast DataFrame.
+#     Also calculate the precision, recall, F1 score, and accuracy.
 
-    Parameters:
-    df_forecast (pd.DataFrame): DataFrame containing the forecasted and actual turn times
-    margin_of_error (float): Margin of error in deciseconds (0.1 second)
+#     Parameters:
+#     df_forecast (pd.DataFrame): DataFrame containing the forecasted and actual turn times
+#     margin_of_error (float): Margin of error in deciseconds (0.1 second)
 
-    Returns:
-    dict: A dictionary containing the True Positives, False Positives, False Negatives, True Negatives, precision, recall, F1 score, and accuracy
-    """
-    df_TP, df_FP, df_FN, tn_count, percentage_score = find_tp_fp_fn_tn(
-        df_forecast, margin_of_error
-    )
-    metrics = calculate_performance_metrics(df_TP, df_FP, df_FN, tn_count)
-    metrics["Percentage Score"] = percentage_score
-    return metrics
+#     Returns:
+#     dict: A dictionary containing the True Positives, False Positives, False Negatives, True Negatives, precision, recall, F1 score, and accuracy
+#     """
+#     df_TP, df_FP, df_FN, tn_count, percentage_score = find_tp_fp_fn_tn(
+#         df_forecast, margin_of_error
+#     )
+#     metrics = calculate_performance_metrics(df_TP, df_FP, df_FN, tn_count)
+#     metrics["Percentage Score"] = percentage_score
+#     return metrics
 
 
 def find_tp_fp_fn_tn(df_forecast: pd.DataFrame, margin_of_error: float = 10):
@@ -570,61 +576,61 @@ def calculate_score_between(df_forecast: pd.DataFrame):
     )
 
 
-def calculate_distance_between(df_forecast: pd.DataFrame):
-    """
-    Input should have columns: 'Turn_Time_Predicted', 'Turn_Time_Actual'
-    margin_of_error - in deciseconds (0.1 second)
-    """
-    predictions = df_forecast[df_forecast["Predicted_Turn"].isin(["left", "right"])]
-    actuals = df_forecast[df_forecast["Behavior"].isin(["left", "right"])]
+# def calculate_distance_between(df_forecast: pd.DataFrame):
+#     """
+#     Input should have columns: 'Turn_Time_Predicted', 'Turn_Time_Actual'
+#     margin_of_error - in deciseconds (0.1 second)
+#     """
+#     predictions = df_forecast[df_forecast["Predicted_Turn"].isin(["left", "right"])]
+#     actuals = df_forecast[df_forecast["Behavior"].isin(["left", "right"])]
 
-    # between turn without error range
-    int_TP_no_error = 0  # True Positives
-    int_FP_no_error = 0  # False Positives
-    int_FN_no_error = 0  # False Negatives
-    matched = set()  # Track matched actual events to avoid double-counting
+#     # between turn without error range
+#     int_TP_no_error = 0  # True Positives
+#     int_FP_no_error = 0  # False Positives
+#     int_FN_no_error = 0  # False Negatives
+#     matched = set()  # Track matched actual events to avoid double-counting
 
-    for index, row in predictions.iterrows():
-        # find closest row before that has status 'START'
-        closest_start = df_forecast.loc[: row.name][
-            df_forecast.loc[: row.name]["Status"] == "START"
-        ].iloc[-1]
-        # find closest row after that has status 'STOP'
-        closest_stop = df_forecast.loc[row.name :][
-            df_forecast.loc[row.name :]["Status"] == "STOP"
-        ].iloc[0]
-        if (
-            closest_start["Behavior"]
-            == closest_stop["Behavior"]
-            == row["Predicted_Turn"]
-            and closest_start.name not in matched
-            and closest_stop.name not in matched
-        ):
-            int_TP_no_error += 1
-            matched.add(closest_start.name)
-            matched.add(closest_stop.name)
-        else:
-            int_FP_no_error += 1
+#     for index, row in predictions.iterrows():
+#         # find closest row before that has status 'START'
+#         closest_start = df_forecast.loc[: row.name][
+#             df_forecast.loc[: row.name]["Status"] == "START"
+#         ].iloc[-1]
+#         # find closest row after that has status 'STOP'
+#         closest_stop = df_forecast.loc[row.name :][
+#             df_forecast.loc[row.name :]["Status"] == "STOP"
+#         ].iloc[0]
+#         if (
+#             closest_start["Behavior"]
+#             == closest_stop["Behavior"]
+#             == row["Predicted_Turn"]
+#             and closest_start.name not in matched
+#             and closest_stop.name not in matched
+#         ):
+#             int_TP_no_error += 1
+#             matched.add(closest_start.name)
+#             matched.add(closest_stop.name)
+#         else:
+#             int_FP_no_error += 1
 
-    # Now calculate False Negatives (Actual events with no predicted match)
-    for index, row in actuals.iterrows():
-        if row.name not in matched:
-            int_FN_no_error += 1
-            matched.add(row.name)  # Mark actual as matched
+#     # Now calculate False Negatives (Actual events with no predicted match)
+#     for index, row in actuals.iterrows():
+#         if row.name not in matched:
+#             int_FN_no_error += 1
+#             matched.add(row.name)  # Mark actual as matched
 
-    int_FN_no_error = int_FN_no_error / 2
-    # Calculate True Negatives (Total non-event points - FP)
-    total_points = len(df_forecast)
-    actual_events = len(df_forecast[df_forecast["Apex"].isin(["left", "right"])])
-    non_event_points = total_points - actual_events
-    tn_count = non_event_points - int_FP_no_error
+#     int_FN_no_error = int_FN_no_error / 2
+#     # Calculate True Negatives (Total non-event points - FP)
+#     total_points = len(df_forecast)
+#     actual_events = len(df_forecast[df_forecast["Apex"].isin(["left", "right"])])
+#     non_event_points = total_points - actual_events
+#     tn_count = non_event_points - int_FP_no_error
 
-    return (
-        int_TP_no_error,
-        int_FP_no_error,
-        int_FN_no_error,
-        tn_count,
-    )
+#     return (
+#         int_TP_no_error,
+#         int_FP_no_error,
+#         int_FN_no_error,
+#         tn_count,
+#     )
 
 
 def calculate_performance_metrics(
@@ -752,21 +758,6 @@ def calculate_performance_metrics(
     return metrics
 
 
-def round_df(df):
-    rounded_times = []
-
-    def round_and_adjust(value):
-        rounded = round(value, 1)
-
-        while rounded in rounded_times:
-            rounded += 0.1
-
-        rounded_times.append(rounded)
-        return rounded
-
-    df["rounded_time"] = df["Time"].apply(round_and_adjust)
-
-
 # !method distance from middle
 def process_turns_with_restricted_distances(df):
     df_copy = df.copy()
@@ -879,7 +870,10 @@ def process_turns_with_restricted_distances(df):
 
     return pd.DataFrame(rows)
 
-
+# TODO: What exactly does 'calculate_scores_sec_metric' compute?
+# How is a "correct prediction" defined in this context?
+# The function counts the ratio of the prediction time distance to the half time of the maneuver. The prediction time distance is how far (in seconds) the predicted point is 
+# from the actual center between START and STOP. The result is a number that tells what percentage of that half is taken up by the prediction distance 
 def calculate_scores_sec_metric(df):
     df_cp = df.copy()
 
@@ -1062,26 +1056,26 @@ def get_score_for_intervals(df):
     return score, len(df)
 
 
-def get_thr_metrick(
-    new_filtered_mins,
-    new_filtered_max,
-    new_filtered_mins_counts,
-    new_filtered_maxs_counts,
-    df,
-):
-    new_method_mins, new_method_max = align_min_max_lists_counts_order(
-        new_filtered_mins,
-        new_filtered_max,
-        new_filtered_mins_counts,
-        new_filtered_maxs_counts,
-    )
-    inteval_df = add_predicted_transitions_to_df(df, new_method_mins, new_method_max)
-    score, df_lenght = get_score_for_intervals(inteval_df)
-    return score, df_lenght
+# def get_thr_metrick(
+#     new_filtered_mins,
+#     new_filtered_max,
+#     new_filtered_mins_counts,
+#     new_filtered_maxs_counts,
+#     df,
+# ):
+#     new_method_mins, new_method_max = align_min_max_lists_counts_order(
+#         new_filtered_mins,
+#         new_filtered_max,
+#         new_filtered_mins_counts,
+#         new_filtered_maxs_counts,
+#     )
+#     inteval_df = add_predicted_transitions_to_df(df, new_method_mins, new_method_max)
+#     score, df_lenght = get_score_for_intervals(inteval_df)
+#     return score, df_lenght
 
 
-def get_sec_metrick(df):
-    df_cp = process_turns_with_restricted_distances(df)
-    df_scores = calculate_scores_sec_metric(df_cp)
-    overall_score = calculate_overall_score(df_scores)
-    return overall_score
+# def get_sec_metrick(df):
+#     df_cp = process_turns_with_restricted_distances(df)
+#     df_scores = calculate_scores_sec_metric(df_cp)
+#     overall_score = calculate_overall_score(df_scores)
+#     return overall_score
