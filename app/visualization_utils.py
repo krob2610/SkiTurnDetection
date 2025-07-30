@@ -420,3 +420,60 @@ def draw_plot_plt(
     print(
         f"Animation saved as {file_name}. Please open the file to view the animation."
     )
+
+
+def plot_predicted_transitions(interval_df):
+    fig = go.Figure()
+    # fig.add_trace(go.Scatter(x=interval_df.index, y=interval_df['yaw'], mode='lines', name='Yaw'))
+    fig.add_trace(
+        go.Scatter(
+            x=interval_df[interval_df["Predicted"] == "left"].index,
+            y=interval_df[interval_df["Predicted"] == "left"]["yaw"],
+            mode="markers",
+            marker=dict(color="green"),
+            name="Predicted left",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=interval_df[interval_df["Predicted"] == "right"].index,
+            y=interval_df[interval_df["Predicted"] == "right"]["yaw"],
+            mode="markers",
+            marker=dict(color="blue"),
+            name="Predicted right",
+        )
+    )
+    fig.update_layout(
+        title=dict(
+            text=(f"Predicted turns on yaw"),
+            font=dict(size=30),  # Increase title font size
+        ),
+        xaxis_title=dict(
+            text="Time", font=dict(size=20)  # Increase x-axis label font size
+        ),
+        yaxis_title=dict(
+            text="Radians", font=dict(size=20)  # Increase y-axis label font size
+        ),
+        legend=dict(
+            x=0.01,  # Position the legend inside the plot
+            y=0.99,
+            traceorder="normal",
+            bgcolor="rgba(255, 255, 255, 0.8)",
+            bordercolor="Black",
+            borderwidth=2,
+            font=dict(size=30),  # Increase legend text size
+            itemsizing="constant",  # Ensure consistent marker size in legend
+            itemwidth=40,  # Increase width of legend items
+        ),
+        width=1200,  # Set the width of the plot
+        height=600,  # Set the height of the plot
+    )
+    fig.show(
+        config={
+            "toImageButtonOptions": {
+                "format": "png",  # one of png, svg, jpeg, webp
+                "filename": "custom_image",
+                "scale": 6,  # Multiply title/legend/axis/canvas sizes by this factor
+            }
+        }
+    )
