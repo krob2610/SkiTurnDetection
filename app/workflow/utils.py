@@ -1048,7 +1048,8 @@ def add_predicted_transitions_to_df(df, predicted_mins, predicted_maxs):
 
     # fill Nan with 'right' or 'left' based on the above one. So if first is 'right' we will fill all NaN with 'right' until we find 'left'
     df_cp["Predicted"] = df_cp["Predicted"].fillna(method="ffill")
-    df_cp["Behavior"] = df_cp["Behavior"].fillna(method="ffill")
+    if "Behavior" in df_cp.columns:
+        df_cp["Behavior"] = df_cp["Behavior"].fillna(method="ffill")
     return df_cp
 
 
